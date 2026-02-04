@@ -5,7 +5,6 @@ from reportlab.lib.units import inch
 
 # Paths
 SVG_FOLDER = os.path.join("svg-symbols", "svg-symbols")
-FONT_PATH = r"C:\Windows\Fonts\arial.ttf"
 
 # Font
 BASE_FONT = "Arial"

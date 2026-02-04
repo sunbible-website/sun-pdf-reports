@@ -2,11 +2,13 @@ from reportlab.lib import colors
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.platypus import TableStyle
 
+from configs import report_config as config
+
 
 def get_report_styles():
-    """Returns a dictionary of custom ReportLab styles using Arial."""
+    """Returns a dictionary of custom ReportLab styles using the base font."""
     styles = getSampleStyleSheet()
-    font_name = "Arial"
+    font_name = config.BASE_FONT
 
     detail_style = ParagraphStyle(
         "Detail",
@@ -23,7 +25,7 @@ def get_report_styles():
         fontName=font_name,
         fontSize=8,
         leading=9,
-        textColor=colors.darkgrey,
+        textColor=colors.black,
     )
 
     header_style = ParagraphStyle(

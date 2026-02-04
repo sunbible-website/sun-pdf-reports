@@ -24,10 +24,12 @@ def load_and_scale_svg(svg_filename, max_width, max_height):
     Returns a reportlab Drawing object or None if the file is missing/invalid.
     """
     if not svg_filename:
+        print("Warning: load_and_scale_svg called with empty/None filename")
         return None
 
     path = os.path.join(config.SVG_FOLDER, svg_filename)
     if not os.path.exists(path):
+        print(f"Warning: SVG file not found - {svg_filename}")
         return None
 
     try:
@@ -40,6 +42,11 @@ def load_and_scale_svg(svg_filename, max_width, max_height):
             drawing.height *= scale
             drawing.scale(scale, scale)
             return drawing
-    except Exception:
-        pass  # Gracefully handle corrupt or invalid SVGs
+        else:
+            print(
+                f"Warning: SVG parsed but empty or invalid dimensions - {svg_filename}"
+            )
+    except Exception as e:
+        print(f"Found a bad svg - {svg_filename}. Error: {e}")
+        pass
     return None

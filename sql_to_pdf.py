@@ -18,8 +18,33 @@ from utils import get_db_connection_string
 load_dotenv()
 
 # Register Font
+font_path = os.getenv("FONT_PATH")
+font_bold_path = os.getenv("FONT_BOLD_PATH")
+font_italic_path = os.getenv("FONT_ITALIC_PATH")
+font_bold_italic_path = os.getenv("FONT_BOLD_ITALIC_PATH")
+
 try:
-    pdfmetrics.registerFont(TTFont(config.BASE_FONT, config.FONT_PATH))
+    if font_path:
+        pdfmetrics.registerFont(TTFont(config.BASE_FONT, font_path))
+
+    if font_bold_path:
+        pdfmetrics.registerFont(TTFont(f"{config.BASE_FONT}-Bold", font_bold_path))
+
+    if font_italic_path:
+        pdfmetrics.registerFont(TTFont(f"{config.BASE_FONT}-Italic", font_italic_path))
+
+    if font_bold_italic_path:
+        pdfmetrics.registerFont(
+            TTFont(f"{config.BASE_FONT}-BoldItalic", font_bold_italic_path)
+        )
+
+    pdfmetrics.registerFontFamily(
+        config.BASE_FONT,
+        normal=config.BASE_FONT,
+        bold=f"{config.BASE_FONT}-Bold",
+        italic=f"{config.BASE_FONT}-Italic",
+        boldItalic=f"{config.BASE_FONT}-BoldItalic",
+    )
 except Exception as e:
     print(f"Warning: Could not register font: {e}")
 
