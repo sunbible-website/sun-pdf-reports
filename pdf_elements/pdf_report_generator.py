@@ -1,0 +1,84 @@
+import pandas as pd
+from pdf_elements.footer import ReportFooter
+from pdf_elements.header import SectionHeader
+from pdf_elements.word_table import WordTable
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Spacer,
+)
+
+from configs import report_config as config
+from configs import report_styles
+from data_query import get_data_query
+from utils import clean_text
+
+
+class PDFReportGenerator:
+    """Handles the generation of the PDF report."""
+
+    def __init__(self, engine, output_path, language_id=1):
+        self.engine = engine
+        self.output_path = output_path
+        self.language_id = language_id
+        self.styles = report_styles.get_report_styles()
+        self.detail_style = self.styles["detail"]
+        self.meta_style = self.styles["meta"]
+
+    def fetch_data(self):
+        """Fetches data from the database."""
+        print(f"Fetching data for Language ID: {self.language_id}...")
+        try:
+            df = pd.read_sql_query(get_data_query(self.language_id), self.engine)
+            print(f"Loaded {len(df)} records.")
+            return df
+        except Exception as e:
+            print(f"Error reading from database: {e}")
+            return None
+
+    def build_story(self, df):
+        """Constructs the flowable story from the data."""
+        story = []
+        df_sorted = df.sort_values(["pdforderby", "pageorderby"])
+
+        for _, group in df_sorted.groupby("pdforderby"):
+            first_record = group.iloc[0]
+            section = clean_text(first_record["sectionname"])
+            subsection = clean_text(first_record["subsectionname"])
+            header_text = f"{section} {subsection}".strip()
+            header_svg_file = f"{clean_text(first_record['unicode_id_id'])}.svg"
+
+            story.append(SectionHeader(header_svg_file, header_text))
+            story.append(Spacer(1, config.SECTION_SPACER_HEIGHT))
+
+            table_builder = WordTable(group, self.detail_style, self.meta_style)
+            table = table_builder.build()
+            if table:
+                story.append(table)
+                story.append(Spacer(1, config.TABLE_SPACER_HEIGHT))
+        return story
+
+    def generate(self):
+        """Executes the full report generation process."""
+        df = self.fetch_data()
+        if df is None or df.empty:
+            print("No data found or error occurred.")
+            return
+
+        story = self.build_story(df)
+
+        print(f"Building PDF: {self.output_path}...")
+        doc = SimpleDocTemplate(
+            self.output_path,
+            pagesize=config.PAGE_SIZE,
+            leftMargin=config.MARGIN_LEFT,
+            rightMargin=config.MARGIN_RIGHT,
+            topMargin=config.MARGIN_TOP,
+            bottomMargin=config.MARGIN_BOTTOM,
+        )
+
+        try:
+            footer = ReportFooter()
+            doc.build(story, onFirstPage=footer, onLaterPages=footer)
+            print("Success.")
+        except Exception as e:
+            print(f"Failed to build PDF: {e}")

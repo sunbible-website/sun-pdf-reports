@@ -1,0 +1,10 @@
+# environement
+.venv
+__pycache__
+.env
+
+# created pdfs
+*.pdf
+
+# hefty folder
+svg-symbols
