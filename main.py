@@ -17,12 +17,13 @@ from utils import get_db_connection_string
 # Load environment variables
 load_dotenv()
 
-# Register Font
+# Register Fonts
 font_path = os.getenv("FONT_PATH")
 font_bold_path = os.getenv("FONT_BOLD_PATH")
 font_italic_path = os.getenv("FONT_ITALIC_PATH")
 font_bold_italic_path = os.getenv("FONT_BOLD_ITALIC_PATH")
 
+# Load fonts into ReportLab, using pdfmetric, so it knows to use them
 try:
     if font_path:
         pdfmetrics.registerFont(TTFont(config.BASE_FONT, font_path))
@@ -50,6 +51,17 @@ except Exception as e:
 
 
 def main():
+    """
+    main() handels the core execution logic of the project.
+    It sets up database connection and uses argparse to accept
+    command line arguments from the user.
+
+    --language: The ID of the language to generate (defaults to `1` for English).
+
+    --output: The filename for the resulting PDF (defaults to `readersDictionaryReport.pdf`).
+
+    usage: python main.py --language 1 --output reportDictionary.pdf
+    """
     parser = argparse.ArgumentParser(description="Generate Reader's Dictionary PDF")
     parser.add_argument(
         "--language", type=int, default=1, help="Language ID (default: 1 for English)"

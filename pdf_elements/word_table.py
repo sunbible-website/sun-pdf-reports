@@ -33,7 +33,7 @@ class WordTable:
         # Main Word
         content = [Paragraph(f"<b>{clean_text(record['word'])}</b>", self.detail_style)]
 
-        # Construction / Etymology
+        # Made from words
         parts = [
             clean_text(record["made_from_word_1"]),
             clean_text(record["made_from_word_2"]),
@@ -70,7 +70,25 @@ class WordTable:
         return self._layout_cell(drawing, text_content)
 
     def build(self):
-        """Builds the main grid Table."""
+        """
+        Builds the main grid Table.
+
+        It arranges items in 'Column-Major' order so the user reads down the first column,
+        then down the second, etc.
+
+        Example (10 items, 3 columns):
+        - Column 1 contains items 0-3
+        - Column 2 contains items 4-7
+        - Column 3 contains items 8-9
+
+        The code constructs rows to match this:
+        - Row 1: [Item 0, Item 4, Item 8]
+        - Row 2: [Item 1, Item 5, Item 9]
+        - ...
+
+        Returns:
+            Table: The fully constructed ReportLab Table object.
+        """
         if self.group_data.empty:
             return None
 

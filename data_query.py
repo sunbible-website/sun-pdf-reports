@@ -1,5 +1,15 @@
 def get_data_query(language_id=1):
-    """Returns the SQL query to fetch report data for a specific language ID."""
+    """
+    Generates the SQL query to fetch data for the given language.
+
+    This query joins four key tables to assemble the report content:
+    1. `readers` & `readersdetail`: Define the document structure (sections, subsections) and item ordering.
+    2. `wordlists`: Provides the core dictionary content (words, made from words, and related meanings).
+    3. `language`: Fetches the target language.
+
+    It filters by the requested Language ID and pre-sorts the results by Section and Page Order.
+    """
+
     return f"""
         SELECT
             readersdetail.readersdetailid,

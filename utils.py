@@ -14,14 +14,27 @@ def get_db_connection_string(dbname, host, user, port=5432, password=None):
 
 
 def clean_text(value):
-    """Sanitizes text fields from the database."""
+    """
+    Cleans text fields from the database.
+    Removes whitespace and ensures we don't have "None" appear
+    in the pdf.
+    """
     return str(value).strip() if pd.notna(value) and str(value).strip() else ""
 
 
 def load_and_scale_svg(svg_filename, max_width, max_height):
     """
     Loads an SVG file and scales it to fit within the specified dimensions.
-    Returns a reportlab Drawing object or None if the file is missing/invalid.
+
+    Example:
+        If an SVG is 100x100 and max_width=50, max_height=50:
+        - scale_w = 50/100 = 0.5
+        - scale_h = 50/100 = 0.5
+        - scale = 0.5
+        Result: The drawing is resized to 50x50.
+
+    Returns:
+        Drawing: A ReportLab Drawing object resized to fit, or None if invalid.
     """
     if not svg_filename:
         print("Warning: load_and_scale_svg called with empty/None filename")

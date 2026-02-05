@@ -27,10 +27,15 @@ class SectionHeader(Flowable):
         self.drawing = load_and_scale_svg(svg_filename, height * 2, height * 0.8)
 
     def wrap(self, aW, aH):
+        """
+        Specifies the size of this flowable.
+        It claims the full available width (aW) and its fixed height.
+        """
         self.width = aW
         return aW, self.height
 
     def _draw_border(self):
+        """Draws a rectangle around the header."""
         self.canv.setStrokeColor(colors.black)
         self.canv.setLineWidth(config.HEADER_BORDER_WIDTH)
         self.canv.rect(0, 0, self.width, self.height)
@@ -39,6 +44,7 @@ class SectionHeader(Flowable):
         return self.drawing.width if self.drawing else 0
 
     def _get_font_size(self):
+        """Adjusts font size based on text length."""
         font_size = config.HEADER_FONT_SIZE_LARGE
         if len(self.text) > 20:
             font_size = config.HEADER_FONT_SIZE_MEDIUM
@@ -49,6 +55,12 @@ class SectionHeader(Flowable):
     def _prepare_text_layout(self, font_size, avail_width):
         """
         Determines if text needs to be wrapped or drawn directly.
+
+        Logic:
+        1. Measures text width at the given font size.
+        2. If it fits, returns metadata for simple string drawing.
+        3. If it overflows, creates a Paragraph object to handle line wrapping.
+
         Returns: (paragraph_obj_or_none, width, height)
         """
         font_name = config.HEADER_FONT_NAME

@@ -1,7 +1,4 @@
 import pandas as pd
-from pdf_elements.footer import ReportFooter
-from pdf_elements.header import SectionHeader
-from pdf_elements.word_table import WordTable
 from reportlab.platypus import (
     SimpleDocTemplate,
     Spacer,
@@ -10,6 +7,9 @@ from reportlab.platypus import (
 from configs import report_config as config
 from configs import report_styles
 from data_query import get_data_query
+from pdf_elements.footer import ReportFooter
+from pdf_elements.header import SectionHeader
+from pdf_elements.word_table import WordTable
 from utils import clean_text
 
 
@@ -36,7 +36,20 @@ class PDFReportGenerator:
             return None
 
     def build_story(self, df):
-        """Constructs the flowable story from the data."""
+        """
+        Constructs the list of ReportLab pdf elements from the data.
+
+        Process:
+        1. Sorts data by Section (pdforderby) and then by Word (pageorderby).
+        2. Groups the data by Section.
+        3. For each section:
+           - Creates a 'SectionHeader' with the section title and symbol.
+           - Creates a 'WordTable' containing all words in that section.
+           - Adds these elements to the list with spacers in between.
+
+        Returns:
+            list: A list of flowables (Headers, Spacers, Tables) ready for the PDF engine.
+        """
         story = []
         df_sorted = df.sort_values(["pdforderby", "pageorderby"])
 

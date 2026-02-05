@@ -1,7 +1,7 @@
 import os
 
 from reportlab.lib.pagesizes import letter
-from reportlab.lib.units import inch
+from reportlab.lib.units import inch  # 1 inch = 72 points (PDF standard unit)
 
 # Paths
 SVG_FOLDER = os.path.join("svg-symbols", "svg-symbols")

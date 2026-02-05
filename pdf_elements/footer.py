@@ -13,7 +13,11 @@ class ReportFooter:
         self.style = self.styles["footer"]
 
     def __call__(self, canvas, doc):
-        """Callback to draw footer on every page."""
+        """
+        Callback to draw footer on every page.
+        Saves the current state of the canvas and restores it
+        when it has finished generating the footer.
+        """
         canvas.saveState()
 
         font_name = self.style.fontName
