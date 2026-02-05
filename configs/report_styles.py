@@ -17,6 +17,7 @@ def get_report_styles():
         fontSize=10,
         leading=12,
         spaceAfter=1,
+        alignment=1,  # Center
     )
 
     meta_style = ParagraphStyle(
@@ -26,6 +27,7 @@ def get_report_styles():
         fontSize=8,
         leading=9,
         textColor=colors.black,
+        alignment=1,  # Center
     )
 
     header_style = ParagraphStyle(
@@ -59,6 +61,7 @@ def get_table_styles():
     inner_cell_style = TableStyle(
         [
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
             ("LINEAFTER", (0, 0), (0, -1), 0.5, colors.black),
             ("LEFTPADDING", (1, 0), (1, -1), 8),
             ("LEFTPADDING", (0, 0), (0, -1), 2),

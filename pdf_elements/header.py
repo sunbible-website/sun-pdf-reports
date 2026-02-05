@@ -5,7 +5,6 @@ from reportlab.platypus import (
 )
 from reportlab.platypus.flowables import Flowable
 
-from configs import report_config as config
 from configs import report_styles
 from utils import load_and_scale_svg
 
@@ -13,18 +12,29 @@ from utils import load_and_scale_svg
 class SectionHeader(Flowable):
     """Flowable to display an SVG symbol and section title side-by-side, centered in a box."""
 
-    def __init__(self, svg_filename, text, width=None, height=config.HEADER_HEIGHT):
+    def __init__(
+        self,
+        svg_filename,
+        text,
+        layout_config,
+        width=None,
+        height=None,
+    ):
         super().__init__()
+        self.layout_config = layout_config
         self.text = text
-        self.height = height
+        self.height = height if height else self.layout_config.HEADER_HEIGHT
         self.width = (
             width
             if width
-            else config.PAGE_SIZE[0] - (config.MARGIN_LEFT + config.MARGIN_RIGHT)
+            else self.layout_config.PAGE_SIZE[0]
+            - (self.layout_config.MARGIN_LEFT + self.layout_config.MARGIN_RIGHT)
         )
 
         # Load SVG
-        self.drawing = load_and_scale_svg(svg_filename, height * 2, height * 0.8)
+        self.drawing = load_and_scale_svg(
+            svg_filename, self.height * 2, self.height * 0.8
+        )
 
     def wrap(self, aW, aH):
         """
@@ -37,7 +47,7 @@ class SectionHeader(Flowable):
     def _draw_border(self):
         """Draws a rectangle around the header."""
         self.canv.setStrokeColor(colors.black)
-        self.canv.setLineWidth(config.HEADER_BORDER_WIDTH)
+        self.canv.setLineWidth(self.layout_config.HEADER_BORDER_WIDTH)
         self.canv.rect(0, 0, self.width, self.height)
 
     def _get_drawing_width(self):
@@ -45,11 +55,11 @@ class SectionHeader(Flowable):
 
     def _get_font_size(self):
         """Adjusts font size based on text length."""
-        font_size = config.HEADER_FONT_SIZE_LARGE
+        font_size = self.layout_config.HEADER_FONT_SIZE_LARGE
         if len(self.text) > 20:
-            font_size = config.HEADER_FONT_SIZE_MEDIUM
+            font_size = self.layout_config.HEADER_FONT_SIZE_MEDIUM
         if len(self.text) > 40:
-            font_size = config.HEADER_FONT_SIZE_SMALL
+            font_size = self.layout_config.HEADER_FONT_SIZE_SMALL
         return font_size
 
     def _prepare_text_layout(self, font_size, avail_width):
@@ -63,7 +73,7 @@ class SectionHeader(Flowable):
 
         Returns: (paragraph_obj_or_none, width, height)
         """
-        font_name = config.HEADER_FONT_NAME
+        font_name = self.layout_config.HEADER_FONT_NAME
         text_width = self.canv.stringWidth(self.text.upper(), font_name, font_size)
 
         if text_width > avail_width:
@@ -90,7 +100,7 @@ class SectionHeader(Flowable):
             text_obj.drawOn(self.canv, x, text_y)
         else:
             # Draw String directly
-            font_name = config.HEADER_FONT_NAME
+            font_name = self.layout_config.HEADER_FONT_NAME
             self.canv.setFont(font_name, font_size)
             text_y = y_center - (font_size * 0.35)
             self.canv.drawString(x, text_y, self.text.upper())
@@ -99,7 +109,7 @@ class SectionHeader(Flowable):
         self._draw_border()
 
         d_width = self._get_drawing_width()
-        gap = config.HEADER_CONTENT_GAP
+        gap = self.layout_config.HEADER_CONTENT_GAP
         content_max_width = self.width - 20
         text_avail_width = content_max_width - d_width - gap
 

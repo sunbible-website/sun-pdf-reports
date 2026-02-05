@@ -6,7 +6,6 @@ from reportlab.platypus import (
     Table,
 )
 
-from configs import report_config as config
 from configs import report_styles
 from utils import clean_text, load_and_scale_svg
 
@@ -17,16 +16,19 @@ class WordTable:
     Layout: 3 columns. Each cell contains [Symbol | Text Details].
     """
 
-    def __init__(self, group_data, detail_style, meta_style):
+    def __init__(self, group_data, detail_style, meta_style, layout_config):
         self.group_data = group_data
         self.detail_style = detail_style
         self.meta_style = meta_style
+        self.layout_config = layout_config
         self.table_styles = report_styles.get_table_styles()
 
     def _get_symbol(self, record):
         """Loads and scales the SVG symbol for the record."""
         svg_name = f"{clean_text(record['unicode_id_id'])}.svg"
-        return load_and_scale_svg(svg_name, config.SVG_ICON_SIZE, config.SVG_ICON_SIZE)
+        return load_and_scale_svg(
+            svg_name, self.layout_config.SVG_ICON_SIZE, self.layout_config.SVG_ICON_SIZE
+        )
 
     def _get_text_content(self, record):
         """Builds the list of text paragraphs for the record."""
@@ -54,11 +56,13 @@ class WordTable:
     def _layout_cell(self, drawing, text_content):
         """Combines symbol and text into the inner cell layout."""
         # Ensure there's a placeholder if drawing is missing to maintain alignment
-        symbol_element = drawing if drawing else Spacer(1, config.SVG_ICON_SIZE)
+        symbol_element = (
+            drawing if drawing else Spacer(1, self.layout_config.SVG_ICON_SIZE)
+        )
 
         cell_sub_table = Table(
             [[symbol_element, text_content]],
-            colWidths=config.INNER_TABLE_COL_WIDTHS,
+            colWidths=self.layout_config.INNER_TABLE_COL_WIDTHS,
         )
         cell_sub_table.setStyle(self.table_styles["inner_cell"])
         return cell_sub_table
@@ -92,7 +96,7 @@ class WordTable:
         if self.group_data.empty:
             return None
 
-        columns = config.TABLE_COLUMNS
+        columns = self.layout_config.TABLE_COLUMNS
         rows_count = math.ceil(len(self.group_data) / columns)
 
         table_data = []
@@ -109,7 +113,7 @@ class WordTable:
             table_data.append(row_cells)
 
         # Main Grid Style
-        col_width = config.TABLE_COL_WIDTH
+        col_width = self.layout_config.TABLE_COL_WIDTH
         table = Table(table_data, colWidths=[col_width] * columns)
         table.setStyle(self.table_styles["main_grid"])
 
