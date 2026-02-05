@@ -48,7 +48,7 @@ class PDFReportGenerator:
         section = clean_text(first_record["sectionname"])
         subsection = clean_text(first_record["subsectionname"])
         header_text = f"{section} {subsection}".strip()
-        header_svg_file = f"{clean_text(first_record['unicode_id_id'])}.svg"
+        header_svg_file = f"{clean_text(first_record['sectionunicode'])}.svg"
 
         return [
             SectionHeader(header_svg_file, header_text, self.layout_config),

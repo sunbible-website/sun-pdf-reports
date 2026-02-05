@@ -18,7 +18,7 @@ def get_data_query(language_id=1):
             readersdetail.pageorderby,
 
             readers.unicodeid AS sectionunicode,
-            readers.sectionname,
+            COALESCE(section_word.word, readers.sectionname) as sectionname,
             readers.subsectionname,
             readers.pdforderby,
 
@@ -37,6 +37,9 @@ def get_data_query(language_id=1):
         JOIN sun.readers
             ON readersdetail.sectionid = readers.sectionid
             AND readers.languageid = 1
+        LEFT JOIN sun.wordlists AS section_word
+            ON readers.unicodeid = section_word.unicode_id_id
+            AND section_word.language_id_id = {language_id}
         JOIN sun.wordlists AS wordlists
             ON readersdetail.unicodeid = wordlists.unicode_id_id
         JOIN sun.language AS language
@@ -44,3 +47,4 @@ def get_data_query(language_id=1):
         WHERE wordlists.language_id_id = {language_id}
         ORDER BY readers.pdforderby, readersdetail.pageorderby ASC;
     """
+
