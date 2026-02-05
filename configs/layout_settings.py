@@ -13,10 +13,10 @@ class LayoutConfig:
 
     # Page Layout
     PAGE_SIZE: tuple = letter
-    MARGIN_LEFT: int = 72
-    MARGIN_RIGHT: int = 72
-    MARGIN_TOP: int = 72
-    MARGIN_BOTTOM: int = 72
+    MARGIN_LEFT: float = 1 * inch
+    MARGIN_RIGHT: float = 1 * inch
+    MARGIN_TOP: float = 1 * inch
+    MARGIN_BOTTOM: float = 1 * inch
 
     # Section Header
     HEADER_HEIGHT: float = 1 * inch

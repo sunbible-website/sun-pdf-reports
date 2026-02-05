@@ -13,7 +13,8 @@ from utils import clean_text, load_and_scale_svg
 class WordTable:
     """
     Constructs a formatted Table flowable.
-    Layout: 3 columns. Each cell contains [Symbol | Text Details].
+    Layout: Each cell contains [Symbol | Text Details].
+    Layout details are passed in from layout config.
     """
 
     def __init__(self, group_data, detail_style, meta_style, layout_config):
