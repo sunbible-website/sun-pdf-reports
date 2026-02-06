@@ -18,8 +18,8 @@ def get_data_query(language_id=1):
             readersdetail.pageorderby,
 
             readers.unicodeid AS sectionunicode,
-            COALESCE(section_word.word, readers.sectionname) as sectionname,
-            readers.subsectionname,
+            {"readers.sectionname" if language_id == 1 else "COALESCE(section_word.word, readers.sectionname)"} as sectionname,
+            readers.subsectionname as subsectionname,
             readers.pdforderby,
 
             wordlists.word,
@@ -47,4 +47,3 @@ def get_data_query(language_id=1):
         WHERE wordlists.language_id_id = {language_id}
         ORDER BY readers.pdforderby, readersdetail.pageorderby ASC;
     """
-

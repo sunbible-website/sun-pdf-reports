@@ -46,8 +46,11 @@ class PDFReportGenerator:
     def _create_section_headers(self, first_record):
         """Creates the section header elements (Header + Spacer)."""
         section = clean_text(first_record["sectionname"])
-        subsection = clean_text(first_record["subsectionname"])
-        header_text = f"{section} {subsection}".strip()
+        if self.language_id == 1:
+            subsection = clean_text(first_record["subsectionname"])
+            header_text = f"{section} {subsection}".strip()
+        else:
+            header_text = f"{section}".strip()
         header_svg_file = f"{clean_text(first_record['sectionunicode'])}.svg"
 
         return [
