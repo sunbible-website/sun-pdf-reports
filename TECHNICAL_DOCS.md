@@ -47,16 +47,14 @@ root/
 ├── configs/
 │   ├── report_styles.py        # Centralized visual styles (Fonts, TableStyles)
 │   └── report_config.py        # Constants (Paths, Fonts)
+│   └── layout_settings.py      # Configurations for pdf layout (Columns, Margins)
 ├── pdf_elements/
 │   ├── pdf_report_generator.py # Main orchestration logic
 │   ├── table_of_contents.py    # Dynamic TOC logic (Multi-pass listener)
 │   ├── header.py               # Section headers (Text + SVG)
 │   ├── footer.py               # Page footer (Page numbers, Date, Language)
 │   ├── word_table.py           # Main dictionary content grid
-│   ├── inline_example.py       # Mixed text/SVG renderer
 │   ├── cover_page.py           # Front cover
-│   ├── instructions_page.py    # Static instruction text
-│   └── word_index.py           # Alphabetical index at end of book
 ```
 
 ## 6. Component Deep Dive
@@ -91,6 +89,7 @@ Renders the actual dictionary entries.
 ```bash
 # Standard English generation
 python main.py --language 1 --output output.pdf
+
 # Spanish version
 python main.py --language 10 --outputSpanish output.pdf
 
