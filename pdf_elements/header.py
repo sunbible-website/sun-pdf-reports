@@ -36,6 +36,9 @@ class SectionHeader(Flowable):
             svg_filename, self.height * 2, self.height * 0.8
         )
 
+        # Mark for TOC collection
+        self.toc_entry = (text, svg_filename)
+
     def wrap(self, aW, aH):
         """
         Specifies the size of this flowable.

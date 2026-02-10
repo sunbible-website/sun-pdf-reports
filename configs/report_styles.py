@@ -46,11 +46,31 @@ def get_report_styles():
         textColor=colors.black,
     )
 
+    toc_text_style = ParagraphStyle(
+        "TocText",
+        parent=styles["Normal"],
+        fontName=font_name,
+        fontSize=10,
+        leading=12,
+        alignment=0,  # Left
+    )
+
+    toc_page_style = ParagraphStyle(
+        "TocPage",
+        parent=styles["Normal"],
+        fontName=font_name,
+        fontSize=10,
+        leading=12,
+        alignment=2,  # Right
+    )
+
     return {
         "detail": detail_style,
         "meta": meta_style,
         "header": header_style,
         "footer": footer_style,
+        "toc_text": toc_text_style,
+        "toc_page": toc_page_style,
     }
 
 
@@ -83,7 +103,24 @@ def get_table_styles():
         ]
     )
 
-    return {"inner_cell": inner_cell_style, "main_grid": main_grid_style}
+    # TOC Table Style
+    toc_style = TableStyle(
+        [
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("LINEBELOW", (0, 0), (-1, 0), 1, colors.black),
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 5),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ("ALIGN", (1, 0), (1, -1), "CENTER"),  # Center Symbol column
+        ]
+    )
+
+    return {
+        "inner_cell": inner_cell_style,
+        "main_grid": main_grid_style,
+        "toc": toc_style,
+    }
 
 
 def get_header_internal_style(font_name, font_size):

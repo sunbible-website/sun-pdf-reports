@@ -63,3 +63,20 @@ def load_and_scale_svg(svg_filename, max_width, max_height):
         print(f"Found a bad svg - {svg_filename}. Error: {e}")
         pass
     return None
+
+
+def get_language_name(engine, language_id):
+    """
+    Fetches the language name from the database.
+    """
+    query = """
+    SELECT name, language_abvr
+    FROM sun.language
+    WHERE language_id = %(language_id)s
+    """
+    df = pd.read_sql_query(query, engine, params={"language_id": language_id})
+
+    if df.empty:
+        raise ValueError(f"No language found for language_id={language_id}")
+
+    return df.iloc[0]["name"]

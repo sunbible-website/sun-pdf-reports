@@ -63,9 +63,7 @@ def main():
 
     --layout: The layout type to use (default: 'default'). Options: 'default', 'single'.
 
-    --no-headers: Whether to include section headers or not. (default: true)
-
-    usage: python main.py --language 1 --output reportDictionary.pdf --layout single --no-headers
+    usage: python main.py --language 1 --output reportDictionary.pdf --layout single
     """
     parser = argparse.ArgumentParser(description="Generate Reader's Dictionary PDF")
     parser.add_argument(
@@ -83,11 +81,6 @@ def main():
         default="default",
         choices=["default", "single"],
         help="Layout type: 'default' (3-col) or 'single' (1-col big)",
-    )
-    parser.add_argument(
-        "--no-headers",
-        action="store_true",
-        help="Disable section headers (title and icon) in the report",
     )
 
     args = parser.parse_args()
@@ -113,7 +106,6 @@ def main():
         args.output,
         layout_config,
         args.language,
-        include_section_headers=not args.no_headers,
     )
     report_generator.generate()
 

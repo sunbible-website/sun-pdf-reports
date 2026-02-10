@@ -1,5 +1,4 @@
 from pandas.core.arrays.datetimes import datetime
-from reportlab.lib import colors
 
 from configs import report_styles
 
@@ -7,8 +6,9 @@ from configs import report_styles
 class ReportFooter:
     """Handles drawing the footer on each PDF page."""
 
-    def __init__(self, layout_config):
+    def __init__(self, layout_config, language_text):
         self.layout_config = layout_config
+        self.language_text = language_text
         self.styles = report_styles.get_report_styles()
         self.style = self.styles["footer"]
 
@@ -26,19 +26,11 @@ class ReportFooter:
         canvas.setFillColor(self.style.textColor)
 
         page_num = canvas.getPageNumber()
-        text = f"Reader's Dictionary - {datetime.now().strftime('%Y-%m-%d')}  |  Page {page_num}"
+        text = f"Reader's Dictionary - {datetime.now().strftime('%Y-%m-%d')} - {self.language_text} | Page {page_num}"
         width = canvas.stringWidth(text, font_name, font_size)
 
         x_pos = (self.layout_config.PAGE_SIZE[0] - width) / 2
         y_pos = self.layout_config.FOOTER_Y_POS
         canvas.drawString(x_pos, y_pos, text)
 
-        canvas.setLineWidth(0.5)
-        canvas.setStrokeColor(colors.lightgrey)
-        canvas.line(
-            self.layout_config.MARGIN_LEFT,
-            y_pos + self.layout_config.FOOTER_LINE_Y_OFFSET,
-            self.layout_config.PAGE_SIZE[0] - self.layout_config.MARGIN_RIGHT,
-            y_pos + self.layout_config.FOOTER_LINE_Y_OFFSET,
-        )
         canvas.restoreState()

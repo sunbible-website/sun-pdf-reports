@@ -1,15 +1,14 @@
 import pandas as pd
-from reportlab.platypus import (
-    SimpleDocTemplate,
-    Spacer,
-)
+from reportlab.lib.units import inch
+from reportlab.platypus import PageBreak, Paragraph, Spacer
 
 from configs import report_styles
 from data_query import get_data_query
 from pdf_elements.footer import ReportFooter
 from pdf_elements.header import SectionHeader
+from pdf_elements.table_of_contents import TableOfContents, TOCReportingDocTemplate
 from pdf_elements.word_table import WordTable
-from utils import clean_text
+from utils import clean_text, get_language_name
 
 
 class PDFReportGenerator:
@@ -21,13 +20,11 @@ class PDFReportGenerator:
         output_path,
         layout_config,
         language_id=1,
-        include_section_headers=True,
     ):
         self.engine = engine
         self.output_path = output_path
         self.layout_config = layout_config
         self.language_id = language_id
-        self.include_section_headers = include_section_headers
         self.styles = report_styles.get_report_styles()
         self.detail_style = self.styles["detail"]
         self.meta_style = self.styles["meta"]
@@ -58,29 +55,32 @@ class PDFReportGenerator:
             Spacer(1, self.layout_config.SECTION_SPACER_HEIGHT),
         ]
 
+    def _create_toc(self):
+        """Creates the Table of Contents section."""
+        story = []
+        toc = TableOfContents(self.styles)
+        story.append(Paragraph("Table of Contents", self.styles["header"]))
+        story.append(Spacer(1, 0.2 * inch))
+        story.append(toc)
+        story.append(PageBreak())
+        return story
+
     def build_story(self, df):
         """
         Constructs the list of ReportLab pdf elements from the data.
-
-        Process:
-        1. Sorts data by Section (pdforderby) and then by Word (pageorderby).
-        2. Groups the data by Section.
-        3. For each section:
-           - Creates a 'SectionHeader' with the section title and symbol.
-           - Creates a 'WordTable' containing all words in that section.
-           - Adds these elements to the list with spacers in between.
-
-        Returns:
-            list: A list of flowables (Headers, Spacers, Tables) ready for the PDF engine.
         """
         story = []
+
+        # --- Table of Contents ---
+        story.extend(self._create_toc())
+
+        # --- Dictionary Content ---
         df_sorted = df.sort_values(["pdforderby", "pageorderby"])
 
         for _, group in df_sorted.groupby("pdforderby"):
             first_record = group.iloc[0]
 
-            if self.include_section_headers:
-                story.extend(self._create_section_headers(first_record))
+            story.extend(self._create_section_headers(first_record))
 
             table_builder = WordTable(
                 group, self.detail_style, self.meta_style, self.layout_config
@@ -89,6 +89,7 @@ class PDFReportGenerator:
             if table:
                 story.append(table)
                 story.append(Spacer(1, self.layout_config.TABLE_SPACER_HEIGHT))
+
         return story
 
     def generate(self):
@@ -98,10 +99,15 @@ class PDFReportGenerator:
             print("No data found or error occurred.")
             return
 
+        # Fetch language info for the footer
+        language_name = get_language_name(self.engine, self.language_id)
+
         story = self.build_story(df)
 
         print(f"Building PDF: {self.output_path}...")
-        doc = SimpleDocTemplate(
+
+        # Use our custom DocTemplate that knows how to report TOC entries
+        doc = TOCReportingDocTemplate(
             self.output_path,
             pagesize=self.layout_config.PAGE_SIZE,
             leftMargin=self.layout_config.MARGIN_LEFT,
@@ -111,8 +117,12 @@ class PDFReportGenerator:
         )
 
         try:
-            footer = ReportFooter(self.layout_config)
-            doc.build(story, onFirstPage=footer, onLaterPages=footer)
+            footer = ReportFooter(self.layout_config, language_name)
+            # multiBuild is required for the TOC to learn page numbers
+            doc.multiBuild(story, onFirstPage=footer, onLaterPages=footer)
             print("Success.")
         except Exception as e:
             print(f"Failed to build PDF: {e}")
+            import traceback
+
+            traceback.print_exc()
