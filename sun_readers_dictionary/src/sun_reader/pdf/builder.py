@@ -48,6 +48,8 @@ def create_pdf_report(engine, output_pdf_path, language_id):
     word_page_map = {}
     current_page_number = 1
     count = 0
+    toc_sections = {}
+    
     
     for pdf_order, group_data in df_sorted.groupby("pdforderby"):
         first = group_data.iloc[0]
@@ -56,16 +58,23 @@ def create_pdf_report(engine, output_pdf_path, language_id):
         section_name = clean(first["sectionname"])
         subsection_name = clean(first["subsectionname"])
         header_text = section_name
+        toc_section_name = section_name
         if subsection_name:
             header_text = subsection_name + " - " + section_name
+            toc_section_name = subsection_name
+        
+        if section_name.lower() == "proper nouns":
+            toc_section_name = section_name + " " +  subsection_name
 
-        # val = first['unicode_id_id']
         first_svg_file = f"{str(first['sectionunicode']).strip()}.svg"
         if not subsection_name:
             first_svg_path = os.path.join(SVG_FOLDER, first_svg_file)
         else:
             first_svg_path = ""
         
+        if toc_section_name not in toc_sections.keys():
+            start_page_number = current_page_number
+            
         story.append(SvgAndWordHeader(first_svg_path, header_text))
         story.append(Spacer(1, 0.15*inch))
 
@@ -147,6 +156,7 @@ def create_pdf_report(engine, output_pdf_path, language_id):
                 story.append(PageBreak())
                 current_page_number += 1  # increment page counter for TOC
                 count += 1
+                toc_sections[toc_section_name] = (start_page_number, current_page_number)
 
     # TOC table header
     toc_table_data = [
@@ -162,25 +172,55 @@ def create_pdf_report(engine, output_pdf_path, language_id):
     words_in_order = [str(row['word']).strip() for _, row in df_sorted.iterrows()]
     words_in_order = list(dict.fromkeys(words_in_order))  # remove duplicates while preserving order
     rows = []
-    for i in range(0, len(words_in_order), 2):
+    
+    # Get the first page words and page number
+    first_page_words_tuple = next(iter(word_page_map.keys()))
+    words_on_first_page = list(first_page_words_tuple)
+    page_no = word_page_map[first_page_words_tuple]
+    
+    sections_in_order = words_on_first_page + list(toc_sections.keys())[1:]
+    # sections_in_order = sections_in_order[1:]
+    
+    for i, word in enumerate(words_on_first_page):
+        sections_in_order.insert(i, word)
+
+    for i in range(0, len(sections_in_order), 2):
         row_cells = []
         for j in range(2):
-            if i+j < len(words_in_order):
-                word = words_in_order[i+j]
-                page_nos = []
-                for words_tuple, page_no in word_page_map.items():
-                    if word in words_tuple:
-                        page_nos.append(page_no)
-                page_no = page_nos[0]
-                symbol = small_svg_for_word(word, word_to_svg, svg_folder=SVG_FOLDER, size=0.25*inch)
-                row_cells.extend([Paragraph(word.replace("_", " "), detail_style), symbol, Paragraph(str(page_no), detail_style)])
+            if i + j < len(sections_in_order):
+                section_name = sections_in_order[i + j]
+                if section_name not in toc_sections.keys():
+                    start = page_no
+                    end = page_no + 1
+                else:
+                    start, end = toc_sections[section_name]
+                
+                end -= 1
+                if start <= end:
+                    page_text = f"{start}"
+                else:
+                    page_text = f"{start} - {end}"
+
+                # Optional: include symbol
+                symbol = small_svg_for_word(section_name.lower(), word_to_svg, svg_folder=SVG_FOLDER, size=0.25*inch)
+                
+                if not symbol:
+                    symbol = Paragraph("", detail_style)
+                    
+                row_cells.extend([
+                    Paragraph(section_name.title(), detail_style),
+                    symbol,
+                    Paragraph(page_text, detail_style)
+                ])
             else:
                 row_cells.extend([Paragraph("", detail_style), Paragraph("", detail_style), Paragraph("", detail_style)])
         toc_table_data.append(row_cells)
 
+
+    # Build table and replace placeholder
     toc_table = Table(toc_table_data, colWidths=[1.8*inch, 0.7*inch, 0.7*inch]*2)
-    story[toc_placeholder_index] = toc_table
     table_style(toc_table, padding=(4,4,2,2))
+    story[toc_placeholder_index] = toc_table
 
     # Filter lowercase words only
     lowercase_words = [

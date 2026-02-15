@@ -18,7 +18,8 @@ SVG_FOLDER = ASSETS_DIR / "svg-symbols"
 # --------------------------------------------------
 
 MAX_ROWS_PER_PAGE = 42
-PAGE_NUMBERING_START_AFTER = 29  # adjust if TOC length changes
+# adjust if TOC length changes
+TOC_LAST_PAGE = 2
 
 
 # --------------------------------------------------
@@ -26,7 +27,6 @@ PAGE_NUMBERING_START_AFTER = 29  # adjust if TOC length changes
 # --------------------------------------------------
 
 DEFAULT_LANGUAGE_ID = 1 # will update this to either use CLI args or config file
-TOC_LAST_PAGE = 24
 
 # --------------------------------------------------
 # Database Configuration (Non-sensitive)
