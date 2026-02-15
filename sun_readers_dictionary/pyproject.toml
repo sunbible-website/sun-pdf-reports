@@ -1,0 +1,10 @@
+[project]
+name = "sun-reader"
+version = "0.1.0"
+dependencies = [
+    "pandas",
+    "sqlalchemy",
+    "psycopg2-binary",
+    "reportlab",
+    "svglib"
+]
