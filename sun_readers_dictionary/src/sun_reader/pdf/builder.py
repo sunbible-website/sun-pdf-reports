@@ -5,7 +5,7 @@ from config import SVG_FOLDER, MAX_ROWS_PER_PAGE, TOC_LAST_PAGE
 from pdf.utils import *
 from utils import clean
 import pandas as pd
-from reportlab.platypus import Paragraph, Spacer, Table, TableStyle, PageBreak
+from reportlab.platypus import Paragraph, Spacer, Table, PageBreak
 from pdf.canvas import *
 from collections import defaultdict
 import math
@@ -175,14 +175,12 @@ def create_pdf_report(engine, output_pdf_path, language_id):
     
     # Get the first page words and page number
     first_page_words_tuple = next(iter(word_page_map.keys()))
-    words_on_first_page = list(first_page_words_tuple)
+    words_on_first_page = list(dict.fromkeys(first_page_words_tuple))
+    
     page_no = word_page_map[first_page_words_tuple]
     
     sections_in_order = words_on_first_page + list(toc_sections.keys())[1:]
-    # sections_in_order = sections_in_order[1:]
-    
-    for i, word in enumerate(words_on_first_page):
-        sections_in_order.insert(i, word)
+  
 
     for i in range(0, len(sections_in_order), 2):
         row_cells = []
@@ -191,18 +189,21 @@ def create_pdf_report(engine, output_pdf_path, language_id):
                 section_name = sections_in_order[i + j]
                 if section_name not in toc_sections.keys():
                     start = page_no
-                    end = page_no + 1
+                    end = page_no
                 else:
                     start, end = toc_sections[section_name]
                 
                 end -= 1
-                if start <= end:
+                if start >= end:
                     page_text = f"{start}"
                 else:
                     page_text = f"{start} - {end}"
+                
+                # if section_name.split()[-1].strip().replace("-","").lower() not in word_to_svg:
+                #     print("NO SYMBOL FOR:", section_name.split()[-1].strip().replace("-","").lower())
 
                 # Optional: include symbol
-                symbol = small_svg_for_word(section_name.lower(), word_to_svg, svg_folder=SVG_FOLDER, size=0.25*inch)
+                symbol = small_svg_for_word(section_name.split()[-1].strip().replace("-","").lower(), word_to_svg, svg_folder=SVG_FOLDER, size=0.25*inch)
                 
                 if not symbol:
                     symbol = Paragraph("", detail_style)
