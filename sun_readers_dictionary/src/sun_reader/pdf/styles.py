@@ -44,14 +44,25 @@ appendix_style = ParagraphStyle(
     spaceAfter=2
 )
 
-def table_style(table, grid_color=colors.grey, bg_color=colors.lightgrey, x=(0,0), y=(-1,-1), padding=(4,4,2,1)):
-    return table.setStyle(TableStyle([
+def table_style(table, grid_color=colors.grey, bg_color=colors.lightgrey, x=(0,0), y=(-1,-1), padding=(4,4,2,1), bg=True):
+    if not bg:
+        return table.setStyle(TableStyle([
                     ("GRID", x, y, 0.5, grid_color),
                     ("VALIGN", x, y, "MIDDLE"),
                     ("ALIGN", x, y, "CENTER"),
                     ("LEFTPADDING", x, y, padding[0]),
                     ("RIGHTPADDING", x, y, padding[1]),
                     ("TOPPADDING", x, y, padding[2]),
-                    ("BOTTOMPADDING",x, y, padding[3]),
-                    ("BACKGROUND", (0,0), (-1,0), bg_color),
+                    ("BOTTOMPADDING",x, y, padding[3])
                 ]))
+    else:
+        return table.setStyle(TableStyle([
+                        ("GRID", x, y, 0.5, grid_color),
+                        ("VALIGN", x, y, "MIDDLE"),
+                        ("ALIGN", x, y, "CENTER"),
+                        ("LEFTPADDING", x, y, padding[0]),
+                        ("RIGHTPADDING", x, y, padding[1]),
+                        ("TOPPADDING", x, y, padding[2]),
+                        ("BOTTOMPADDING",x, y, padding[3]),
+                        ("BACKGROUND", (0,0), (-1,0), bg_color),
+                    ]))

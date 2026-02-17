@@ -287,7 +287,7 @@ def create_pdf_report(engine, output_pdf_path, language_id):
 
     # Create the table
     index_table = Table(index_table_data, colWidths=[2.2*inch]*3)
-    table_style(index_table, padding=(4,4,2,2))
+    table_style(index_table, padding=(4,4,2,2), bg=False)
     story.append(index_table)
     
     # Filter uppercase words only
@@ -351,7 +351,7 @@ def create_pdf_report(engine, output_pdf_path, language_id):
 
     # Create the table
     uindex_table = Table(uindex_table_data, colWidths=[2.2*inch]*3)
-    table_style(uindex_table, padding=(4,4,2,2))
+    table_style(uindex_table, padding=(4,4,2,2), bg=False)
     story.append(uindex_table)
     
     # --- BUILD PDF ---
