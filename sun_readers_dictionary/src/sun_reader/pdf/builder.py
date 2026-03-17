@@ -126,13 +126,16 @@ def create_pdf_report(engine, output_pdf_path, language_id):
 
                             # WORD
                             made_from_cols = [col for col in row.keys() if col.startswith("made_from_word_")]
-                            # rel_cols = [col for col in row.keys() if col.startswith("made_from_word_")]
+                            alt_cols = [col for col in row.keys() if col.startswith("alt_word_")]
                             # if row['related_meaning']:
                             #     all_words = [str(row['related_meaning']).strip()]
                             # else:
                             all_words = []
                             mf_words = [str(row[col]).strip() for col in made_from_cols if row[col]]
+                            a_words = [str(row[col]).strip() for col in alt_cols if row[col]]
                             all_words += mf_words
+                            all_words += a_words
+                            all_words = list(set(all_words))
                             if all_words:
                                 row_cells.append(
                                     Paragraph(f"{clean(row['word']).replace('_', ' ')}<br/><font size='7'><i>({', '.join(all_words)})</i></font>", detail_style)

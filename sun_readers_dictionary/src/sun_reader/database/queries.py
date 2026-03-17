@@ -21,6 +21,12 @@ READERS_QUERY = """
             wordlists.made_from_word_5,
             wordlists.made_from_word_6,
             wordlists.made_from_word_7,
+            
+            wordlists.alt_word_1,
+            wordlists.alt_word_2,
+            wordlists.alt_word_3,
+            wordlists.alt_word_4,
+            wordlists.alt_word_5,
 
             language.txt_readers_dict_cover_1,
             language.txt_page_no
