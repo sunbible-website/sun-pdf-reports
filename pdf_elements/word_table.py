@@ -7,7 +7,19 @@ from reportlab.platypus import (
 )
 
 from configs import report_styles
+from pdf_elements.header import SectionHeader
 from utils import clean_text, load_and_scale_svg
+
+
+class CellHeader(SectionHeader):
+    """Custom header for the table cell, reusing SectionHeader logic but without border."""
+
+    def _draw_border(self):
+        pass
+
+    def _get_font_size(self):
+        # Use a smaller font size for the table header
+        return self.layout_config.HEADER_FONT_SIZE_SMALL
 
 
 class WordTable:
@@ -17,11 +29,21 @@ class WordTable:
     Layout details are passed in from layout config.
     """
 
-    def __init__(self, group_data, detail_style, meta_style, layout_config):
+    def __init__(
+        self,
+        group_data,
+        detail_style,
+        meta_style,
+        layout_config,
+        header_text,
+        header_symbol_path,
+    ):
         self.group_data = group_data
         self.detail_style = detail_style
         self.meta_style = meta_style
         self.layout_config = layout_config
+        self.header_text = header_text
+        self.header_symbol_path = header_symbol_path
         self.table_styles = report_styles.get_table_styles()
 
     def _get_symbol(self, record):
@@ -74,6 +96,22 @@ class WordTable:
         text_content = self._get_text_content(record)
         return self._layout_cell(drawing, text_content)
 
+    def _create_header_cell(self):
+        """Creates the header cell for the top of the column."""
+
+        total_width = (
+            self.layout_config.TABLE_COL_WIDTH * self.layout_config.TABLE_COLUMNS
+        )
+
+        return CellHeader(
+            self.header_symbol_path,
+            self.header_text,
+            self.layout_config,
+            width=total_width,
+            height=self.layout_config.HEADER_HEIGHT * 0.8,
+            gap=10,
+        )
+
     def build(self):
         """
         Builds the main grid Table.
@@ -102,6 +140,11 @@ class WordTable:
 
         table_data = []
 
+        # Create header row
+        header_cell = self._create_header_cell()
+        header_row = [header_cell] + [""] * (columns - 1)
+        table_data.append(header_row)
+
         for r in range(rows_count):
             row_cells = []
             for c in range(columns):
@@ -115,7 +158,12 @@ class WordTable:
 
         # Main Grid Style
         col_width = self.layout_config.TABLE_COL_WIDTH
-        table = Table(table_data, colWidths=[col_width] * columns)
+        table = Table(table_data, colWidths=[col_width] * columns, repeatRows=1)
+
+        # Span the header row
+        self.table_styles["main_grid"].add("SPAN", (0, 0), (-1, 0))
+        self.table_styles["main_grid"].add("ALIGN", (0, 0), (-1, 0), "CENTER")
+
         table.setStyle(self.table_styles["main_grid"])
 
         return table

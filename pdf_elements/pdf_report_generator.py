@@ -40,16 +40,8 @@ class PDFReportGenerator:
             print(f"Error reading from database: {e}")
             return None
 
-    def _create_section_headers(self, first_record):
+    def _create_section_headers(self, header_text, header_svg_file):
         """Creates the section header elements (Header + Spacer)."""
-        section = clean_text(first_record["sectionname"])
-        if self.language_id == 1:
-            subsection = clean_text(first_record["subsectionname"])
-            header_text = f"{section} {subsection}".strip()
-        else:
-            header_text = f"{section}".strip()
-        header_svg_file = f"{clean_text(first_record['sectionunicode'])}.svg"
-
         return [
             SectionHeader(header_svg_file, header_text, self.layout_config),
             Spacer(1, self.layout_config.SECTION_SPACER_HEIGHT),
@@ -65,6 +57,43 @@ class PDFReportGenerator:
         story.append(PageBreak())
         return story
 
+    def _get_section_header_info(self, first_record):
+        """Determines the header text and SVG file for a section."""
+        section = clean_text(first_record["sectionname"])
+        if self.language_id == 1:
+            subsection = clean_text(first_record["subsectionname"])
+            header_text = f"{section} {subsection}".strip()
+        else:
+            header_text = f"{section}".strip()
+
+        header_svg_file = f"{clean_text(first_record['sectionunicode'])}.svg"
+        return header_text, header_svg_file
+
+    def _create_section_elements(self, group):
+        """Generates flowables for a single section (headers + table)."""
+        elements = []
+        first_record = group.iloc[0]
+        header_text, header_svg_file = self._get_section_header_info(first_record)
+
+        # Add headers
+        elements.extend(self._create_section_headers(header_text, header_svg_file))
+
+        # Add table
+        table_builder = WordTable(
+            group,
+            self.detail_style,
+            self.meta_style,
+            self.layout_config,
+            header_text,
+            header_svg_file,
+        )
+        table = table_builder.build()
+        if table:
+            elements.append(table)
+            elements.append(Spacer(1, self.layout_config.TABLE_SPACER_HEIGHT))
+
+        return elements
+
     def build_story(self, df):
         """
         Constructs the list of ReportLab pdf elements from the data.
@@ -78,17 +107,7 @@ class PDFReportGenerator:
         df_sorted = df.sort_values(["pdforderby", "pageorderby"])
 
         for _, group in df_sorted.groupby("pdforderby"):
-            first_record = group.iloc[0]
-
-            story.extend(self._create_section_headers(first_record))
-
-            table_builder = WordTable(
-                group, self.detail_style, self.meta_style, self.layout_config
-            )
-            table = table_builder.build()
-            if table:
-                story.append(table)
-                story.append(Spacer(1, self.layout_config.TABLE_SPACER_HEIGHT))
+            story.extend(self._create_section_elements(group))
 
         return story
 

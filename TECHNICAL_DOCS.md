@@ -54,7 +54,6 @@ root/
 │   ├── header.py               # Section headers (Text + SVG)
 │   ├── footer.py               # Page footer (Page numbers, Date, Language)
 │   ├── word_table.py           # Main dictionary content grid
-│   ├── cover_page.py           # Front cover
 ```
 
 ## 6. Component Deep Dive

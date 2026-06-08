@@ -19,6 +19,7 @@ class SectionHeader(Flowable):
         layout_config,
         width=None,
         height=None,
+        gap=None,
     ):
         super().__init__()
         self.layout_config = layout_config
@@ -30,6 +31,7 @@ class SectionHeader(Flowable):
             else self.layout_config.PAGE_SIZE[0]
             - (self.layout_config.MARGIN_LEFT + self.layout_config.MARGIN_RIGHT)
         )
+        self.gap = gap if gap is not None else self.layout_config.HEADER_CONTENT_GAP
 
         # Load SVG
         self.drawing = load_and_scale_svg(
@@ -48,10 +50,11 @@ class SectionHeader(Flowable):
         return aW, self.height
 
     def _draw_border(self):
-        """Draws a rectangle around the header."""
+        """Draws a bottom line for the header."""
         self.canv.setStrokeColor(colors.black)
         self.canv.setLineWidth(self.layout_config.HEADER_BORDER_WIDTH)
-        self.canv.rect(0, 0, self.width, self.height)
+        # Draw line at the bottom of the flowable
+        self.canv.line(0, 0, self.width, 0)
 
     def _get_drawing_width(self):
         return self.drawing.width if self.drawing else 0
@@ -112,20 +115,19 @@ class SectionHeader(Flowable):
         self._draw_border()
 
         d_width = self._get_drawing_width()
-        gap = self.layout_config.HEADER_CONTENT_GAP
         content_max_width = self.width - 20
-        text_avail_width = content_max_width - d_width - gap
+        text_avail_width = content_max_width - d_width - self.gap
 
         font_size = self._get_font_size()
         text_obj, text_width, text_height = self._prepare_text_layout(
             font_size, text_avail_width
         )
 
-        total_content_width = d_width + gap + text_width
+        total_content_width = d_width + self.gap + text_width
         start_x = (self.width - total_content_width) / 2
         center_y = self.height / 2
 
         self._draw_symbol(start_x, center_y)
         self._draw_text_element(
-            start_x + d_width + gap, center_y, text_obj, text_height, font_size
+            start_x + d_width + self.gap, center_y, text_obj, text_height, font_size
         )
